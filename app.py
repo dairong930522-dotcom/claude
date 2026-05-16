@@ -15,7 +15,13 @@ import webbrowser
 from threading import Timer
 
 app = Flask(__name__)
-DB_PATH = 'despacho.db'
+
+# When packaged with PyInstaller, store the DB next to the .exe
+if getattr(sys, 'frozen', False):
+    _base_dir = os.path.dirname(sys.executable)
+else:
+    _base_dir = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(_base_dir, 'despacho.db')
 
 HTML_TEMPLATE = '''
 <!DOCTYPE html>
