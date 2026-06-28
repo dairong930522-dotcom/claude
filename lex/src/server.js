@@ -1,9 +1,11 @@
 const express = require('express');
+const path = require('path');
 const { puerto } = require('./config');
 const { auth } = require('./middleware/auth');
 
 const app = express();
 app.use(express.json());
+app.use(express.static(path.join(__dirname, '..', 'public')));
 
 // Salud (sin auth, para monitorización / arranque)
 app.get('/salud', (req, res) => res.json({ ok: true, servicio: 'lex' }));
