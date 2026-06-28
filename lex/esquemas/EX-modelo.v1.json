@@ -1,0 +1,26 @@
+{
+  "formulario": "EX-MODELO",
+  "version": "v1",
+  "descripcion": "Formulario de demostración con la estructura de un EX (datos personales + un checkbox).",
+  "origen_coordenadas": "inferior-izquierda",
+  "_nota": "pdf-lib usa el origen abajo-izquierda (y crece hacia arriba). Mides las coords UNA vez por formulario y viven aquí, no en el código.",
+  "campos": [
+    { "clave": "apellido1",        "tipo": "texto",    "pagina": 0, "x": 150, "y": 690, "size": 11 },
+    { "clave": "apellido2",        "tipo": "texto",    "pagina": 0, "x": 150, "y": 668, "size": 11 },
+    { "clave": "nombre",           "tipo": "texto",    "pagina": 0, "x": 150, "y": 646, "size": 11 },
+    { "clave": "nie",              "tipo": "texto",    "pagina": 0, "x": 150, "y": 624, "size": 11, "obligatorio": true },
+    { "clave": "pasaporte",        "tipo": "texto",    "pagina": 0, "x": 400, "y": 624, "size": 11 },
+    { "clave": "nacionalidad",     "tipo": "texto",    "pagina": 0, "x": 150, "y": 602, "size": 11 },
+    { "clave": "fecha_nacimiento", "tipo": "texto",    "pagina": 0, "x": 400, "y": 602, "size": 11 },
+    { "clave": "lugar_nacimiento", "tipo": "texto",    "pagina": 0, "x": 150, "y": 580, "size": 11 },
+    { "clave": "sexo",             "tipo": "texto",    "pagina": 0, "x": 400, "y": 580, "size": 11 },
+    { "clave": "estado_civil",     "tipo": "texto",    "pagina": 0, "x": 150, "y": 558, "size": 11 },
+    { "clave": "domicilio",        "tipo": "texto",    "pagina": 0, "x": 150, "y": 514, "size": 11 },
+    { "clave": "localidad",        "tipo": "texto",    "pagina": 0, "x": 150, "y": 492, "size": 11 },
+    { "clave": "provincia",        "tipo": "texto",    "pagina": 0, "x": 400, "y": 492, "size": 11 },
+    { "clave": "cp",               "tipo": "texto",    "pagina": 0, "x": 150, "y": 470, "size": 11 },
+    { "clave": "telefono",         "tipo": "texto",    "pagina": 0, "x": 400, "y": 470, "size": 11 },
+    { "clave": "email",            "tipo": "texto",    "pagina": 0, "x": 150, "y": 448, "size": 11 },
+    { "clave": "reside_espana",    "tipo": "checkbox", "pagina": 0, "x": 322, "y": 404, "size": 12 }
+  ]
+}

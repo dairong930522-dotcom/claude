@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LEX — Despacho de Extranjería</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, -apple-system, sans-serif; background: #f0f4f8; color: #1a202c; }
+  header { background: #1e3a5f; color: white; padding: 1rem 2rem; display: flex; align-items: center; gap: 1rem; }
+  header h1 { font-size: 1.4rem; font-weight: 700; letter-spacing: 0.05em; }
+  header span { font-size: 0.85rem; opacity: 0.7; }
+  #login-screen { max-width: 380px; margin: 5rem auto; background: white; border-radius: 12px; padding: 2rem; box-shadow: 0 4px 24px rgba(0,0,0,0.1); }
+  #login-screen h2 { margin-bottom: 1.5rem; color: #1e3a5f; }
+  .main { display: none; max-width: 1100px; margin: 2rem auto; padding: 0 1rem; }
+  .tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
+  .tab { padding: 0.6rem 1.4rem; border-radius: 8px; border: none; cursor: pointer; font-size: 0.9rem; background: white; color: #555; box-shadow: 0 1px 4px rgba(0,0,0,0.08); transition: all 0.15s; }
+  .tab.active { background: #1e3a5f; color: white; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .card { background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 1px 6px rgba(0,0,0,0.07); margin-bottom: 1.5rem; }
+  .card h3 { font-size: 1rem; color: #1e3a5f; margin-bottom: 1rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.5rem; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+  .form-full { grid-column: 1 / -1; }
+  label { display: block; font-size: 0.78rem; font-weight: 600; color: #555; margin-bottom: 0.25rem; }
+  input, select { width: 100%; padding: 0.5rem 0.75rem; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 0.9rem; outline: none; transition: border 0.15s; }
+  input:focus, select:focus { border-color: #1e3a5f; }
+  .btn { padding: 0.55rem 1.2rem; border-radius: 6px; border: none; cursor: pointer; font-size: 0.88rem; font-weight: 600; transition: all 0.15s; }
+  .btn-primary { background: #1e3a5f; color: white; }
+  .btn-primary:hover { background: #2a4f82; }
+  .btn-success { background: #2f855a; color: white; }
+  .btn-success:hover { background: #276749; }
+  .btn-sm { padding: 0.35rem 0.8rem; font-size: 0.8rem; }
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; font-size: 0.75rem; font-weight: 600; color: #718096; padding: 0.5rem 0.75rem; border-bottom: 2px solid #e2e8f0; text-transform: uppercase; letter-spacing: 0.05em; }
+  td { padding: 0.65rem 0.75rem; border-bottom: 1px solid #f0f4f8; font-size: 0.88rem; }
+  tr:last-child td { border-bottom: none; }
+  .badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; }
+  .badge-borrador { background: #ebf8ff; color: #2b6cb0; }
+  .badge-presentado { background: #f0fff4; color: #276749; }
+  .toast { position: fixed; bottom: 1.5rem; right: 1.5rem; padding: 0.75rem 1.25rem; border-radius: 8px; color: white; font-size: 0.88rem; font-weight: 600; opacity: 0; transition: opacity 0.3s; z-index: 99; }
+  .toast.ok { background: #2f855a; }
+  .toast.err { background: #c53030; }
+  .toast.show { opacity: 1; }
+  .user-bar { margin-left: auto; font-size: 0.82rem; opacity: 0.85; display: flex; align-items: center; gap: 0.75rem; }
+  .user-bar button { background: rgba(255,255,255,0.15); border: none; color: white; padding: 0.3rem 0.7rem; border-radius: 5px; cursor: pointer; font-size: 0.8rem; }
+  .empty { color: #a0aec0; text-align: center; padding: 2rem; font-size: 0.9rem; }
+  .select-row select { max-width: 320px; }
+  .actions { display: flex; gap: 0.5rem; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>LEX</h1>
+  <span>Gestión de Expedientes de Extranjería</span>
+  <div class="user-bar" id="user-bar" style="display:none!important"></div>
+</header>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <h2>Acceso al despacho</h2>
+  <div style="margin-bottom:1rem">
+    <label>Email</label>
+    <input id="l-email" type="email" value="admin@demo.lex" placeholder="email@despacho.es">
+  </div>
+  <div style="margin-bottom:1.5rem">
+    <label>Contraseña</label>
+    <input id="l-clave" type="password" value="admin1234">
+  </div>
+  <button class="btn btn-primary" style="width:100%" onclick="login()">Entrar</button>
+  <p id="l-err" style="color:#c53030;font-size:0.82rem;margin-top:0.75rem"></p>
+</div>
+
+<!-- MAIN APP -->
+<div class="main" id="main">
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('clientes')">Clientes</button>
+    <button class="tab" onclick="showTab('expedientes')">Expedientes</button>
+  </div>
+
+  <!-- CLIENTES -->
+  <div class="panel active" id="panel-clientes">
+    <div class="card">
+      <h3>Nuevo cliente</h3>
+      <div class="form-grid">
+        <div><label>Nombre *</label><input id="c-nombre" placeholder="María"></div>
+        <div><label>Apellido 1 *</label><input id="c-ap1" placeholder="Rodríguez"></div>
+        <div><label>Apellido 2</label><input id="c-ap2" placeholder="Torres"></div>
+        <div><label>NIE</label><input id="c-nie" placeholder="X1234567A"></div>
+        <div><label>Pasaporte</label><input id="c-pasaporte" placeholder="AB123456"></div>
+        <div><label>Nacionalidad</label><input id="c-nac" placeholder="Venezolana"></div>
+        <div><label>Fecha nacimiento</label><input id="c-fnac" type="date"></div>
+        <div><label>Sexo</label>
+          <select id="c-sexo"><option value="">—</option><option>H</option><option>M</option></select>
+        </div>
+        <div class="form-full"><label>Domicilio</label><input id="c-dom" placeholder="Calle Mayor 10, 2ºA"></div>
+        <div><label>Localidad</label><input id="c-loc" placeholder="Madrid"></div>
+        <div><label>Provincia</label><input id="c-prov" placeholder="Madrid"></div>
+        <div><label>CP</label><input id="c-cp" placeholder="28001"></div>
+        <div><label>Teléfono</label><input id="c-tel" placeholder="600000000"></div>
+        <div><label>Email</label><input id="c-email" placeholder="cliente@ejemplo.com"></div>
+      </div>
+      <button class="btn btn-primary" style="margin-top:1rem" onclick="crearCliente()">Guardar cliente</button>
+    </div>
+
+    <div class="card">
+      <h3>Clientes del despacho</h3>
+      <table id="tabla-clientes">
+        <thead><tr><th>Nombre</th><th>Apellidos</th><th>NIE</th><th>Acciones</th></tr></thead>
+        <tbody id="body-clientes"><tr><td colspan="4" class="empty">Cargando…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- EXPEDIENTES -->
+  <div class="panel" id="panel-expedientes">
+    <div class="card">
+      <h3>Nuevo expediente</h3>
+      <div class="form-grid">
+        <div class="select-row"><label>Cliente *</label><select id="e-cliente"><option value="">Selecciona…</option></select></div>
+        <div><label>Formulario *</label>
+          <select id="e-formulario"><option value="EX-MODELO">EX-MODELO (demo)</option></select>
+        </div>
+      </div>
+      <button class="btn btn-primary" style="margin-top:1rem" onclick="crearExpediente()">Crear expediente</button>
+    </div>
+
+    <div class="card">
+      <h3>Expedientes</h3>
+      <table id="tabla-expedientes">
+        <thead><tr><th>Formulario</th><th>Cliente</th><th>Estado</th><th>Creado</th><th>Acciones</th></tr></thead>
+        <tbody id="body-expedientes"><tr><td colspan="5" class="empty">Cargando…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = '';
+let token = null;
+let clientes = [];
+let expedientes = [];
+
+async function api(method, path, body) {
+  const res = await fetch(API + path, {
+    method,
+    headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: 'Bearer ' + token } : {}) },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  if (path.endsWith('/generar') && res.ok) return res;
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || res.statusText);
+  return data;
+}
+
+function toast(msg, ok = true) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + (ok ? 'ok' : 'err') + ' show';
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+async function login() {
+  const email = document.getElementById('l-email').value;
+  const clave = document.getElementById('l-clave').value;
+  try {
+    const data = await api('POST', '/api/auth/login', { email, clave });
+    token = data.token;
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('main').style.display = 'block';
+    document.getElementById('user-bar').style.display = 'flex';
+    document.getElementById('user-bar').innerHTML = `<span>${email}</span><button onclick="logout()">Salir</button>`;
+    cargarClientes();
+    cargarExpedientes();
+  } catch (e) {
+    document.getElementById('l-err').textContent = e.message;
+  }
+}
+
+function logout() {
+  token = null;
+  location.reload();
+}
+
+function showTab(name) {
+  document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', ['clientes','expedientes'][i] === name));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  if (name === 'expedientes') cargarSelectClientes();
+}
+
+async function cargarClientes() {
+  try {
+    clientes = await api('GET', '/api/clientes');
+    const tbody = document.getElementById('body-clientes');
+    if (!clientes.length) { tbody.innerHTML = '<tr><td colspan="4" class="empty">Sin clientes todavía</td></tr>'; return; }
+    tbody.innerHTML = clientes.map(c => `
+      <tr>
+        <td>${c.nombre}</td>
+        <td>${c.apellido1}${c.apellido2 ? ' ' + c.apellido2 : ''}</td>
+        <td>${c.nie || '—'}</td>
+        <td><button class="btn btn-sm btn-primary" onclick="nuevoExpedienteParaCliente('${c.id}')">Nuevo expediente</button></td>
+      </tr>`).join('');
+  } catch (e) { toast(e.message, false); }
+}
+
+function cargarSelectClientes() {
+  const sel = document.getElementById('e-cliente');
+  sel.innerHTML = '<option value="">Selecciona…</option>' +
+    clientes.map(c => `<option value="${c.id}">${c.apellido1}, ${c.nombre} ${c.nie ? '('+c.nie+')' : ''}</option>`).join('');
+}
+
+async function cargarExpedientes() {
+  // No hay endpoint GET /expedientes todavía; los guardamos en memoria tras crearlos.
+  renderExpedientes();
+}
+
+function renderExpedientes() {
+  const tbody = document.getElementById('body-expedientes');
+  if (!expedientes.length) { tbody.innerHTML = '<tr><td colspan="5" class="empty">Sin expedientes todavía</td></tr>'; return; }
+  tbody.innerHTML = expedientes.map(e => `
+    <tr>
+      <td>${e.formulario}</td>
+      <td>${e._clienteNombre || '—'}</td>
+      <td><span class="badge badge-${e.estado}">${e.estado}</span></td>
+      <td>${new Date(e.creado_en).toLocaleDateString('es-ES')}</td>
+      <td class="actions">
+        <button class="btn btn-sm btn-success" onclick="generarPDF('${e.id}','${e.formulario}')">⬇ PDF</button>
+      </td>
+    </tr>`).join('');
+}
+
+async function crearCliente() {
+  const get = id => document.getElementById(id).value.trim();
+  const body = { nombre: get('c-nombre'), apellido1: get('c-ap1') };
+  if (get('c-ap2')) body.apellido2 = get('c-ap2');
+  if (get('c-nie')) body.nie = get('c-nie');
+  if (get('c-pasaporte')) body.pasaporte = get('c-pasaporte');
+  if (get('c-nac')) body.nacionalidad = get('c-nac');
+  if (get('c-fnac')) body.fecha_nacimiento = get('c-fnac');
+  if (get('c-sexo')) body.sexo = get('c-sexo');
+  if (get('c-dom')) body.domicilio = get('c-dom');
+  if (get('c-loc')) body.localidad = get('c-loc');
+  if (get('c-prov')) body.provincia = get('c-prov');
+  if (get('c-cp')) body.cp = get('c-cp');
+  if (get('c-tel')) body.telefono = get('c-tel');
+  if (get('c-email')) body.email = get('c-email');
+  try {
+    await api('POST', '/api/clientes', body);
+    toast('Cliente guardado ✓');
+    ['c-nombre','c-ap1','c-ap2','c-nie','c-pasaporte','c-nac','c-fnac','c-dom','c-loc','c-prov','c-cp','c-tel','c-email'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('c-sexo').value = '';
+    cargarClientes();
+  } catch (e) { toast(e.message, false); }
+}
+
+function nuevoExpedienteParaCliente(clienteId) {
+  showTab('expedientes');
+  setTimeout(() => { document.getElementById('e-cliente').value = clienteId; }, 50);
+}
+
+async function crearExpediente() {
+  const clienteId = document.getElementById('e-cliente').value;
+  const formulario = document.getElementById('e-formulario').value;
+  if (!clienteId) { toast('Selecciona un cliente', false); return; }
+  try {
+    const exp = await api('POST', '/api/expedientes', { cliente_id: clienteId, formulario });
+    const cliente = clientes.find(c => c.id === clienteId);
+    exp._clienteNombre = cliente ? `${cliente.apellido1}, ${cliente.nombre}` : '';
+    expedientes.unshift(exp);
+    renderExpedientes();
+    toast('Expediente creado ✓');
+  } catch (e) { toast(e.message, false); }
+}
+
+async function generarPDF(id, formulario) {
+  try {
+    toast('Generando PDF…');
+    const res = await api('POST', `/api/expedientes/${id}/generar`);
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `${formulario}-${id.slice(0,8)}.pdf`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast('PDF descargado ✓');
+  } catch (e) { toast(e.message, false); }
+}
+</script>
+</body>
+</html>
