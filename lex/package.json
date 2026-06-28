@@ -1,0 +1,22 @@
+{
+  "name": "lex",
+  "version": "0.1.0",
+  "description": "SaaS vertical para despachos de extranjería: rellena formularios EX y gestiona expedientes.",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "demo": "node demo.js",
+    "test": "node --test test/*.test.js",
+    "seed": "node db/seed.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "pdf-lib": "^1.17.1",
+    "pg": "^8.12.0",
+    "zod": "^3.23.8"
+  }
+}
