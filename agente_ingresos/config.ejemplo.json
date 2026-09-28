@@ -1,0 +1,74 @@
+{
+  "modo_prueba": true,
+  "modelo": "claude-opus-5",
+  "minutos_entre_ciclos": 60,
+  "negocio": {
+    "nombre": "Tu Empresa",
+    "remitente_nombre": "Tu Nombre",
+    "direccion_postal": "Calle Ejemplo 1, 28001 Madrid, España",
+    "oferta": "Auditoría express de presencia online para pymes (informe + 30 min de llamada)",
+    "precio": 97,
+    "moneda": "eur",
+    "cliente_ideal": "Pymes locales de servicios (clínicas, despachos, reformas) con web anticuada",
+    "propuesta_valor": "Detectamos en 48 h qué está frenando que su web consiga clientes y cómo arreglarlo",
+    "web": "https://tuempresa.com"
+  },
+  "angulos_venta": [
+    "ahorro de tiempo",
+    "más clientes desde la web",
+    "diagnóstico gratuito de un problema concreto que has visto en su web",
+    "pregunta directa y breve"
+  ],
+  "limites": {
+    "emails_por_dia": 30,
+    "seguimientos_max": 2,
+    "dias_entre_seguimientos": 3,
+    "presupuesto_ia_diario_usd": 3.0,
+    "perdida_maxima_usd": 60
+  },
+  "prospeccion": {
+    "busqueda_web": true,
+    "zona": "Madrid, España",
+    "leads_por_ciclo": 10,
+    "max_busquedas": 5
+  },
+  "marketing": {
+    "piezas_por_dia": 3,
+    "canales": [
+      "LinkedIn",
+      "Blog",
+      "Instagram"
+    ]
+  },
+  "director": {
+    "max_fallos_seguidos": 3
+  },
+  "subagentes": {
+    "cobrador": {
+      "activo": true
+    },
+    "recepcionista": {
+      "activo": true,
+      "presupuesto_pct": 0.25
+    },
+    "prospector": {
+      "activo": true,
+      "presupuesto_pct": 0.25
+    },
+    "comercial": {
+      "activo": true,
+      "presupuesto_pct": 0.3
+    },
+    "marketing": {
+      "activo": true,
+      "presupuesto_pct": 0.1,
+      "modelo": "claude-sonnet-5"
+    },
+    "analista": {
+      "activo": true,
+      "presupuesto_pct": 0.1,
+      "min_envios_para_juzgar": 20,
+      "max_angulos_activos": 5
+    }
+  }
+}
