@@ -44,22 +44,25 @@ class Riesgo:
 
 
 class Selector:
-    """Bandido multibrazo (Thompson) sobre los ángulos de venta."""
+    """Bandido multibrazo (Thompson) sobre los ángulos de venta activos.
+    Los ángulos del config son la semilla; el subagente Analista puede retirar
+    los que no funcionan y proponer otros nuevos."""
 
     def __init__(self, db, angulos, rng=None):
         self.db = db
         self.rng = rng or random.Random()
         for a in angulos:
             db.ex("INSERT OR IGNORE INTO variantes (nombre) VALUES (?)", a)
-        self.angulos = angulos
+
+    def activos(self):
+        return self.db.q("SELECT * FROM variantes WHERE activo = 1 ORDER BY nombre")
 
     def elegir(self) -> str:
         mejor, mejor_valor = None, -1.0
-        for a in self.angulos:
-            r = self.db.uno("SELECT envios, exitos FROM variantes WHERE nombre = ?", a)
+        for r in self.activos():
             valor = self.rng.betavariate(1 + r["exitos"], 1 + r["envios"] - r["exitos"])
             if valor > mejor_valor:
-                mejor, mejor_valor = a, valor
+                mejor, mejor_valor = r["nombre"], valor
         return mejor
 
     def envio(self, angulo):
@@ -68,3 +71,14 @@ class Selector:
     def exito(self, angulo):
         if angulo:
             self.db.ex("UPDATE variantes SET exitos = exitos + 1 WHERE nombre = ?", angulo)
+
+    def retirar(self, angulo):
+        self.db.ex("UPDATE variantes SET activo = 0 WHERE nombre = ?", angulo)
+
+    def anadir(self, angulo) -> bool:
+        angulo = angulo.strip()
+        if not angulo or self.db.uno("SELECT 1 FROM variantes WHERE nombre = ?", angulo):
+            return False
+        from .db import ahora
+        self.db.ex("INSERT INTO variantes (nombre, creado) VALUES (?, ?)", angulo, ahora())
+        return True

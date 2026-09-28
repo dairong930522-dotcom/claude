@@ -34,6 +34,41 @@
   },
   "marketing": {
     "piezas_por_dia": 3,
-    "canales": ["LinkedIn", "Blog", "Instagram"]
+    "canales": [
+      "LinkedIn",
+      "Blog",
+      "Instagram"
+    ]
+  },
+  "director": {
+    "max_fallos_seguidos": 3
+  },
+  "subagentes": {
+    "cobrador": {
+      "activo": true
+    },
+    "recepcionista": {
+      "activo": true,
+      "presupuesto_pct": 0.25
+    },
+    "prospector": {
+      "activo": true,
+      "presupuesto_pct": 0.25
+    },
+    "comercial": {
+      "activo": true,
+      "presupuesto_pct": 0.3
+    },
+    "marketing": {
+      "activo": true,
+      "presupuesto_pct": 0.1,
+      "modelo": "claude-sonnet-5"
+    },
+    "analista": {
+      "activo": true,
+      "presupuesto_pct": 0.1,
+      "min_envios_para_juzgar": 20,
+      "max_angulos_activos": 5
+    }
   }
 }

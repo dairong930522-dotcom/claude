@@ -47,7 +47,9 @@ CREATE TABLE IF NOT EXISTS ingresos (
 CREATE TABLE IF NOT EXISTS variantes (
     nombre TEXT PRIMARY KEY,
     envios INTEGER NOT NULL DEFAULT 0,
-    exitos INTEGER NOT NULL DEFAULT 0
+    exitos INTEGER NOT NULL DEFAULT 0,
+    activo INTEGER NOT NULL DEFAULT 1,
+    creado TEXT
 );
 CREATE TABLE IF NOT EXISTS estado (
     clave TEXT PRIMARY KEY,
@@ -76,6 +78,10 @@ class DB:
         self.con = sqlite3.connect(ruta)
         self.con.row_factory = sqlite3.Row
         self.con.executescript(ESQUEMA)
+        columnas = {r["name"] for r in self.q("PRAGMA table_info(variantes)")}
+        if "activo" not in columnas:  # bases de datos de la versión anterior
+            self.con.execute("ALTER TABLE variantes ADD COLUMN activo INTEGER NOT NULL DEFAULT 1")
+            self.con.execute("ALTER TABLE variantes ADD COLUMN creado TEXT")
         self.con.commit()
 
     def q(self, sql: str, *params):
@@ -126,6 +132,12 @@ class DB:
     def coste_dia(self, dia=None) -> float:
         dia = dia or hoy()
         r = self.uno("SELECT COALESCE(SUM(usd),0) s FROM costes WHERE fecha LIKE ?", dia + "%")
+        return r["s"]
+
+    def coste_dia_prefijo(self, prefijo, dia=None) -> float:
+        dia = dia or hoy()
+        r = self.uno("SELECT COALESCE(SUM(usd),0) s FROM costes WHERE fecha LIKE ? AND concepto LIKE ?",
+                     dia + "%", prefijo + "%")
         return r["s"]
 
     def coste_total(self) -> float:

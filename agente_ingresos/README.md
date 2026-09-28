@@ -1,17 +1,32 @@
 # Agente de ingresos
 
-Agente autónomo que, en cada ciclo (por defecto cada hora):
+Un **director** coordina a **seis subagentes especializados**. Cada uno tiene su propio rol,
+su parte del presupuesto de IA y, si quieres, su propio modelo. En cada ciclo (por defecto cada
+hora) el director los lanza en este orden:
 
-1. **Cobra**: detecta pagos en Stripe y los atribuye al cliente que los hizo.
-2. **Atiende respuestas**: lee tu bandeja, clasifica cada respuesta con Claude y contesta
-   (con el enlace de pago si hay interés). Si no sabe responder, **te lo escala**.
-3. **Busca clientes**: investiga en la web empresas que encajan con tu cliente ideal y que
-   publican un email corporativo (guarda la URL de origen de cada contacto).
-4. **Vende**: escribe emails personalizados y hace hasta 2 seguimientos.
-5. **Aprende**: prueba varios "ángulos de venta" y cada vez usa más el que mejor responde
-   (muestreo de Thompson).
-6. **Hace marketing**: genera cada día piezas de contenido para tus redes/blog en `salida/contenido/`.
-7. **Informa**: escribe `salida/informe.md` y te lo envía por email una vez al día.
+| Subagente | Qué hace | Presupuesto IA |
+|---|---|---|
+| **cobrador** | Detecta pagos en Stripe y marca como cliente a quien paga. | sin IA |
+| **recepcionista** | Lee tu bandeja, contesta dudas, envía el enlace de pago y gestiona las bajas. Lo que no sabe resolver te lo pasa a ti. | 25 % |
+| **prospector** | Busca en la web empresas que encajan con tu cliente ideal y publican un email corporativo (guarda de dónde lo sacó). | 25 % |
+| **comercial** | Escribe el primer email personalizado y hasta 2 seguimientos. Elige el ángulo de venta que mejor funciona (muestreo de Thompson). | 30 % |
+| **marketing** | Crea cada día piezas de contenido para redes y blog en `salida/contenido/`, sin repetir temas. | 10 % |
+| **analista** | Una vez al día mide resultados, **retira los ángulos de venta que rinden claramente peor, inventa otros nuevos** y te deja recomendaciones en `salida/analisis/`. | 10 % |
+
+El director además:
+- Si un subagente agota su parte del presupuesto, **solo se para ese**; los demás siguen.
+- Si un subagente falla 3 veces seguidas (p. ej. se cae el SMTP), **lo desactiva y te avisa** en el informe.
+  `python -m agente_ingresos reanudar` lo vuelve a activar.
+- Te envía el informe diario (`salida/informe.md`) con el estado y el gasto de cada subagente.
+
+Cada subagente se configura en `config.json` → `subagentes`:
+
+```json
+"marketing": {"activo": true, "presupuesto_pct": 0.10, "modelo": "claude-sonnet-5"}
+```
+
+`activo: false` lo apaga, `presupuesto_pct` es su parte del presupuesto diario y `modelo`
+permite usar uno más barato para tareas sencillas.
 
 ## Lo que ningún sistema puede hacer: garantizar que nunca pierdes
 
@@ -64,7 +79,7 @@ python -m agente_ingresos ejecutar        # bucle continuo
 ```
 
 Otros comandos: `importar leads.csv` (columnas `empresa,email,contacto,web,notas`), `informe`,
-`pausar`, `reanudar`.
+`subagentes` (estado de cada uno), `pausar`, `reanudar`.
 
 ## Qué necesitas
 

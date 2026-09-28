@@ -4,7 +4,9 @@
   python -m agente_ingresos ciclo              ejecuta un ciclo completo y sale (ideal para cron)
   python -m agente_ingresos ejecutar           bucle continuo, un ciclo cada `minutos_entre_ciclos`
   python -m agente_ingresos informe            muestra el informe actual
-  python -m agente_ingresos pausar | reanudar  interruptor manual
+  python -m agente_ingresos pausar | reanudar  interruptor manual (reanudar también
+                                               reactiva subagentes desactivados por fallos)
+  python -m agente_ingresos subagentes         lista los subagentes y su estado
 """
 
 import json
@@ -31,7 +33,7 @@ def main(argv):
             shutil.copy(EJEMPLO, CONFIG)
             print(f"Creado {CONFIG}. Edítalo con los datos de tu negocio.")
         return 0
-    if orden not in ("importar", "ciclo", "ejecutar", "informe", "pausar", "reanudar"):
+    if orden not in ("importar", "ciclo", "ejecutar", "informe", "pausar", "reanudar", "subagentes"):
         print(__doc__)
         return 1
     with open(CONFIG, encoding="utf-8") as f:
@@ -53,7 +55,11 @@ def main(argv):
         print("Agente pausado")
     elif orden == "reanudar":
         agente.riesgo.reanudar()
+        agente.reactivar()
         print("Agente reanudado")
+    elif orden == "subagentes":
+        texto = agente.informe(agente.riesgo.motivo_pausa())
+        print(texto[texto.index("Subagentes:"):texto.index("Emails enviados")])
     return 0
 
 

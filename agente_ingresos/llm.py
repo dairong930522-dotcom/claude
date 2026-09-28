@@ -34,8 +34,8 @@ class LLM:
                 f"Presupuesto diario de IA agotado ({self.presupuesto:.2f} USD)"
             )
 
-    def _contabilizar(self, respuesta, concepto):
-        entrada, salida = PRECIOS.get(self.modelo, (5.0, 25.0))
+    def _contabilizar(self, respuesta, concepto, modelo):
+        entrada, salida = PRECIOS.get(modelo, (5.0, 25.0))
         u = respuesta.usage
         tokens_in = (u.input_tokens or 0) + (getattr(u, "cache_creation_input_tokens", 0) or 0)
         tokens_in += 0.1 * (getattr(u, "cache_read_input_tokens", 0) or 0)
@@ -45,19 +45,20 @@ class LLM:
             usd += (getattr(stu, "web_search_requests", 0) or 0) * USD_POR_BUSQUEDA
         self.db.registrar_coste(f"ia:{concepto}", usd)
 
-    def _crear(self, concepto, **kwargs):
+    def _crear(self, concepto, modelo=None, **kwargs):
         self._comprobar_presupuesto()
-        if self.modelo in MODELOS_CON_FALLBACK:
+        modelo = modelo or self.modelo
+        if modelo in MODELOS_CON_FALLBACK:
             # Si el modelo rechaza una petición, la API la reintenta con otro modelo.
             r = self.cliente.beta.messages.create(
-                model=self.modelo,
+                model=modelo,
                 betas=["server-side-fallback-2026-07-01"],
                 fallbacks="default",
                 **kwargs,
             )
         else:
-            r = self.cliente.messages.create(model=self.modelo, **kwargs)
-        self._contabilizar(r, concepto)
+            r = self.cliente.messages.create(model=modelo, **kwargs)
+        self._contabilizar(r, concepto, modelo)
         if r.stop_reason == "refusal":
             raise RuntimeError(f"El modelo rechazó la petición ({concepto})")
         return r
@@ -66,9 +67,10 @@ class LLM:
     def _texto(respuesta) -> str:
         return "".join(b.text for b in respuesta.content if b.type == "text")
 
-    def json(self, concepto: str, system: str, prompt: str, esquema: dict, max_tokens=8000) -> dict:
+    def json(self, concepto: str, system: str, prompt: str, esquema: dict, max_tokens=8000, modelo=None) -> dict:
         r = self._crear(
             concepto,
+            modelo=modelo,
             max_tokens=max_tokens,
             system=system,
             output_config={"effort": "medium", "format": {"type": "json_schema", "schema": esquema}},
@@ -76,12 +78,12 @@ class LLM:
         )
         return json.loads(self._texto(r))
 
-    def investigar(self, concepto: str, system: str, prompt: str, max_busquedas=5, max_tokens=16000):
+    def investigar(self, concepto: str, system: str, prompt: str, max_busquedas=5, max_tokens=16000, modelo=None):
         """Pide a Claude que investigue en la web y devuelva una lista JSON."""
         mensajes = [{"role": "user", "content": prompt}]
         herramientas = [{"type": "web_search_20260209", "name": "web_search", "max_uses": max_busquedas}]
         for _ in range(4):  # continúa si la API pausa el turno
-            r = self._crear(concepto, max_tokens=max_tokens, system=system,
+            r = self._crear(concepto, modelo=modelo, max_tokens=max_tokens, system=system,
                             tools=herramientas, messages=mensajes)
             if r.stop_reason != "pause_turn":
                 break
